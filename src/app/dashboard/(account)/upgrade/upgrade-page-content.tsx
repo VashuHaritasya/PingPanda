@@ -24,8 +24,9 @@ export const UpgradePageContent = ({ plan }: { plan: Plan }) => {
   const { data: usageData } = useQuery({
     queryKey: ["usage"],
     queryFn: async () => {
-      const res = await client.project.getUsage.$get()
-      return await res.json()
+      const res = await fetch("/api/project/getUsage") // Replace with correct API path
+      if (!res.ok) throw new Error("Failed to fetch usage data")
+      return res.json()
     },
   })
 
