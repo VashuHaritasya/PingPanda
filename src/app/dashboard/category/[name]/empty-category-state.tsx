@@ -1,5 +1,4 @@
 import { Card } from "@/components/ui/card"
-import { client } from "@/lib/client"
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
@@ -11,39 +10,43 @@ export const EmptyCategoryState = ({
 }: {
   categoryName: string
 }) => {
-  const router = useRouter
+  const router = useRouter()
 
   const { data } = useQuery({
     queryKey: ["category", categoryName, "hasEvents"],
     queryFn: async () => {
-      const res = await client.category.pollCategory.$get({
-        name: categoryName,
-      })
+      const res = await fetch(`/api/category/pollCategory?name=${categoryName}`)
+      if (!res.ok) {
+        throw new Error("Failed to fetch category events")
+      }
       return await res.json()
     },
     refetchInterval(query) {
       return query.state.data?.hasEvents ? false : 1000
     },
   })
+
   const hasEvents = data?.hasEvents
 
   useEffect(() => {
-    if (hasEvents) router.refresh()
-  }, [hasEvents, router])
+    if (hasEvents) {
+      window.location.reload() // Refreshes the page
+    }
+  }, [hasEvents])
 
   const codeSnippet = `await fetch('http://localhost:3000/api/events', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY'
-  },
-  body: JSON.stringify({
-    category: '${categoryName}',
-    fields: {
-      field1: 'value1', // for example: user id
-      field2: 'value2' // for example: user email
-    }
-  })
-})`
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_API_KEY'
+    },
+    body: JSON.stringify({
+      category: '${categoryName}',
+      fields: {
+        field1: 'value1', // for example: user id
+        field2: 'value2' // for example: user email
+      }
+    })
+  })`
 
   return (
     <Card

@@ -18,7 +18,18 @@ export const AccountSettings = ({
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (discordId: string) => {
-      const res = await client.project.setDiscordID.$post({ discordId })
+      const res = await fetch("/api/project/setDiscordID", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ discordId }),
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to set Discord ID")
+      }
+
       return await res.json()
     },
   })
